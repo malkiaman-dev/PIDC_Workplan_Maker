@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIDC Workplan Maker</title>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --primary: #2c5aa0;
+      --primary-hover: #234a87;
+      --primary-light: #e8f0fa;
+      --holiday: #16a34a;
+      --holiday-bg: #f0fdf4;
+      --weekoff: #ea580c;
+      --weekoff-bg: #fff7ed;
+      --both: #dc2626;
+      --both-bg: #fef2f2;
+      --training: #7c3aed;
+      --training-bg: #f5f3ff;
+      --working: #0284c7;
+      --working-bg: #f0f9ff;
+      --buffer: #b45309;
+      --buffer-bg: #fff2cc;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+      --radius: 10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #1a3560 0%, #2c5aa0 100%);
+      color: #fff;
+      padding: 1.5rem 1.25rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .app-header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .app-header p {
+      margin: 0 auto;
+      max-width: 560px;
+      opacity: 0.85;
+      font-size: 0.9rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .panel-title {
+      margin: 0 0 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .panel-title::before {
+      content: "";
+      width: 4px;
+      height: 1.1rem;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .field input[type="text"],
+    .field input[type="number"],
+    .field input[type="password"],
+    .field select {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field select.native-select-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .custom-select {
+      position: relative;
+      width: 100%;
+    }
+
+    .custom-select-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    .custom-select-trigger:hover {
+      border-color: #cbd5e1;
+      background: #fafbfc;
+    }
+
+    .custom-select.open .custom-select-trigger,
+    .custom-select-trigger:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.15);
+    }
+
+    .custom-select-chevron {
+      flex-shrink: 0;
+      color: var(--primary);
+      transition: transform 0.2s;
+    }
+
+    .custom-select.open .custom-select-chevron {
+      transform: rotate(180deg);
+    }
+
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      z-index: 50;
+      padding: 0.35rem;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .custom-select-option {
+      display: block;
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .custom-select-option:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .custom-select-option.selected {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .custom-select-option.selected:hover {
+      background: var(--primary-hover);
+      color: #fff;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.15);
+    }
+
+    .calculated-date {
+      background: var(--primary-light) !important;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .field-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .weekdays {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    .weekday-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      user-select: none;
+      transition: all 0.15s;
+    }
+
+    .weekday-chip:has(input:checked) {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .weekday-chip input { accent-color: var(--primary); }
+
+    .checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .checkbox-field input { accent-color: var(--primary); width: 1rem; height: 1rem; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) { background: #f8fafc; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-card .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .summary-card .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+      color: var(--text);
+    }
+
+    .summary-card.working .value { color: var(--working); }
+    .summary-card.total .value { color: var(--primary); }
+    .summary-card.girls .value { color: var(--holiday); }
+    .summary-card.off .value { color: var(--weekoff); }
+
+    .milestones {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .milestone-item {
+      background: var(--primary-light);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .milestone-item strong { color: var(--primary); }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .toolbar .field { flex: 1; min-width: 180px; margin: 0; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-training { background: var(--training-bg); color: var(--training); }
+    .badge-working { background: var(--working-bg); color: var(--working); }
+    .badge-holiday { background: var(--holiday-bg); color: var(--holiday); }
+    .badge-weekoff { background: var(--weekoff-bg); color: var(--weekoff); }
+    .badge-both { background: var(--both-bg); color: var(--both); }
+    .badge-buffer { background: var(--buffer-bg); color: var(--buffer); }
+
+    .phase-block {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      background: #fafbfc;
+    }
+
+    .phase-block h3 {
+      margin: 0 0 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .hh-dates-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.1fr) minmax(200px, 1fr) minmax(200px, 1fr);
+      gap: 1rem;
+      align-items: end;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .hh-dates-row .field-checkbox .checkbox-field {
+      margin-top: 0;
+      min-height: 2.45rem;
+      padding: 0.55rem 0;
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    .hh-dates-hint {
+      grid-column: 1 / -1;
+      margin-top: -0.25rem;
+    }
+
+    .hh-start-input {
+      min-height: 2.45rem;
+    }
+
+    @media (max-width: 900px) {
+      .hh-dates-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+
+      .hh-dates-row .field-checkbox .checkbox-field {
+        min-height: auto;
+        padding: 0;
+      }
+    }
+
+    .results-phase { margin-bottom: 1.5rem; }
+    .results-phase:last-child { margin-bottom: 0; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead {
+      background: #f8fafc;
+      border-bottom: 2px solid var(--border);
+    }
+
+    th {
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    .plan-table tbody tr:hover td { filter: brightness(0.97); }
+
+    tr.row-buffer td:first-child { border-left: 4px solid var(--buffer); }
+
+    tr.row-total td { background: #fce4d6; font-weight: 700; }
+
+    .plan-table thead tr {
+      background: #2e75b6;
+      color: #fff;
+    }
+
+    .plan-table thead th {
+      color: #fff;
+      border-color: #1f3864;
+    }
+
+    .doc-title-bar {
+      background: #1f3864;
+      color: #fff;
+      padding: 0.65rem 0.75rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 1px solid #1f3864;
+      border-bottom: none;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .plan-table-wrap .table-wrap {
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+
+    .empty-state,
+    .loading-state,
+    .error-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .error-state { color: var(--both); }
+
+    .spinner {
+      display: inline-block;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+
+    .period-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    #summarySection { margin-bottom: 0; }
+    #resultsPanel { margin-top: 1.25rem; }
+
+    .date-picker { position: relative; }
+
+    .date-picker-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .date-picker-display {
+      width: 100%;
+      padding: 0.6rem 2.5rem 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .date-picker-display:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.15);
+    }
+
+    .date-picker-icon {
+      position: absolute;
+      right: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      background: transparent;
+      color: var(--primary);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .date-picker-icon:hover { background: var(--primary-light); }
+
+    .date-picker-popup {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 280px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      z-index: 60;
+      padding: 0.75rem;
+    }
+
+    .date-picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .date-picker-month-year {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .date-picker-nav {
+      width: 2rem;
+      height: 2rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .date-picker-nav:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .date-picker-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      margin-bottom: 0.35rem;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .date-picker-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .date-picker-day {
+      height: 2rem;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      font-size: 0.85rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .date-picker-day:hover:not(.empty) { background: var(--primary-light); }
+
+    .date-picker-day.today {
+      border: 1px solid var(--primary);
+      font-weight: 600;
+    }
+
+    .date-picker-day.selected {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .date-picker-day.empty { cursor: default; }
+
+    .date-picker-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .date-picker-footer button {
+      border: none;
+      background: transparent;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .date-picker-footer button:hover { background: var(--primary-light); }
+
+    @media (max-width: 640px) {
+      .app-header h1 { font-size: 1.25rem; }
+      .summary-card .value { font-size: 1.25rem; }
+      th, td { padding: 0.5rem 0.6rem; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .no-print { display: none !important; }
+      .panel, .summary-card { box-shadow: none; break-inside: avoid; }
+      .app-header { background: #2c5aa0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .table-wrap { border: 1px solid #ccc; }
+      tbody tr:hover { background: transparent; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="app-header no-print">
+  <div class="container">
+    <h1>PIDC Workplan Maker</h1>
+    <p>Set a start date and criteria — tracking and HH/GIRLS workplans are built automatically with refresher and buffer days.</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="panel no-print" id="configPanel">
+    <h2 class="panel-title">District &amp; Plan Type</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label for="districtSelect">District</label>
+        <select id="districtSelect">
+          <option value="dik">D.I. Khan</option>
+          <option value="hangu">Hangu</option>
+          <option value="lakki">Lakki Marwat</option>
+          <option value="torghar">Torghar</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="planMode">Plan Type</label>
+        <select id="planMode">
+          <option value="full" selected>Full FOP (Tracking + HH)</option>
+          <option value="tracking">Tracking Only</option>
+          <option value="hh">HH/GIRLS Only</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="trackingConfig" class="phase-block">
+      <h3>Girls Tracking Exercise</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label for="trkGirlsTarget">Girls to Track</label>
+          <input type="number" id="trkGirlsTarget" min="1" value="1703">
+        </div>
+        <div class="field">
+          <label for="trkStaff">Field Staff (Enumerators)</label>
+          <input type="number" id="trkStaff" min="1" value="12">
+        </div>
+        <div class="field">
+          <label for="trkGirlsPerStaff">Girls per Tracker / Day</label>
+          <input type="number" id="trkGirlsPerStaff" min="1" value="10">
+        </div>
+        <div class="field">
+          <label for="trkRefresherDays">Refresher Days (start)</label>
+          <input type="number" id="trkRefresherDays" min="0" value="1">
+        </div>
+        <div class="field">
+          <label for="trkBufferDays">Buffer Days (end)</label>
+          <input type="number" id="trkBufferDays" min="0" value="2">
+        </div>
+        <div class="field">
+          <label>Tracking End Date</label>
+          <input type="text" id="trkEndDateDisplay" class="calculated-date" readonly placeholder="Auto-calculated">
+        </div>
+      </div>
+    </div>
+
+    <div id="hhConfig" class="phase-block">
+      <h3>Household / HH/GIRLS Interview Phase</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label for="hhSchoolGirls">School Girls Target</label>
+          <input type="number" id="hhSchoolGirls" min="1" value="1618">
+          <div class="field-hint">Mothers &amp; Fathers match this count (3× total interviews)</div>
+        </div>
+        <div class="field">
+          <label for="hhStaff">Field Staff (per working day)</label>
+          <input type="number" id="hhStaff" min="1" value="12">
+        </div>
+        <div class="field">
+          <label for="hhInterviewsPerStaff">Interviews per Staff / Day</label>
+          <input type="number" id="hhInterviewsPerStaff" min="1" value="4">
+          <div class="field-hint">Per respondent type (Girl, Mother, or Father)</div>
+        </div>
+        <div class="field">
+          <label for="hhRefresherDays">Refresher Days (start)</label>
+          <input type="number" id="hhRefresherDays" min="0" value="1">
+        </div>
+        <div class="field">
+          <label for="hhBufferDays">Buffer Days (end)</label>
+          <input type="number" id="hhBufferDays" min="0" value="0">
+        </div>
+      </div>
+
+      <div class="hh-dates-row" id="hhStartField">
+        <div class="field field-checkbox">
+          <label for="hhStartAuto">HH Start Mode</label>
+          <label class="checkbox-field">
+            <input type="checkbox" id="hhStartAuto" checked>
+            <span>Auto — start the day after tracking ends</span>
+          </label>
+        </div>
+        <div class="field">
+          <label>HH Phase Start Date</label>
+          <div id="hhStartManualWrap" class="hidden hh-start-input">
+            <div class="date-picker" id="hhStartDatePicker">
+              <div class="date-picker-input-wrap">
+                <input type="text" class="date-picker-display" readonly placeholder="Select HH start date">
+                <button type="button" class="date-picker-icon" aria-label="Open calendar">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </button>
+                <input type="hidden" id="hhStartDate">
+              </div>
+              <div class="date-picker-popup hidden">
+                <div class="date-picker-header">
+                  <button type="button" class="date-picker-nav prev" aria-label="Previous month">‹</button>
+                  <span class="date-picker-month-year"></span>
+                  <button type="button" class="date-picker-nav next" aria-label="Next month">›</button>
+                </div>
+                <div class="date-picker-weekdays">
+                  <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                </div>
+                <div class="date-picker-days"></div>
+                <div class="date-picker-footer">
+                  <button type="button" class="date-picker-clear">Clear</button>
+                  <button type="button" class="date-picker-today">Today</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="text" id="hhStartAutoDisplay" class="calculated-date hh-start-input" readonly placeholder="Calculated when plan is generated">
+        </div>
+        <div class="field">
+          <label>HH End Date</label>
+          <input type="text" id="hhEndDateDisplay" class="calculated-date hh-start-input" readonly placeholder="Auto-calculated">
+        </div>
+        <div class="field-hint hh-dates-hint" id="hhStartHint">HH begins the calendar day after tracking buffer ends (no gap).</div>
+      </div>
+    </div>
+
+    <h2 class="panel-title" style="margin-top: 1.25rem;">Start Date &amp; Weekly Offs</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label>Project Start Date</label>
+        <div class="date-picker" id="startDatePicker">
+          <div class="date-picker-input-wrap">
+            <input type="text" class="date-picker-display" readonly placeholder="Select start date">
+            <button type="button" class="date-picker-icon" aria-label="Open calendar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </button>
+            <input type="hidden" id="startDate">
+          </div>
+          <div class="date-picker-popup hidden">
+            <div class="date-picker-header">
+              <button type="button" class="date-picker-nav prev" aria-label="Previous month">‹</button>
+              <span class="date-picker-month-year"></span>
+              <button type="button" class="date-picker-nav next" aria-label="Next month">›</button>
+            </div>
+            <div class="date-picker-weekdays">
+              <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+            </div>
+            <div class="date-picker-days"></div>
+            <div class="date-picker-footer">
+              <button type="button" class="date-picker-clear">Clear</button>
+              <button type="button" class="date-picker-today">Today</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Overall End Date</label>
+        <input type="text" id="endDateDisplay" class="calculated-date" readonly placeholder="Auto-calculated from criteria">
+        <input type="hidden" id="endDate">
+        <div class="field-hint">Full plan end including buffer days, weekly offs &amp; public holidays.</div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top: 1rem;">
+      <label>Weekly Off Days</label>
+      <div class="weekdays" id="weekdayCheckboxes">
+        <label class="weekday-chip"><input type="checkbox" value="0"> Sun</label>
+        <label class="weekday-chip"><input type="checkbox" value="1"> Mon</label>
+        <label class="weekday-chip"><input type="checkbox" value="2"> Tue</label>
+        <label class="weekday-chip"><input type="checkbox" value="3"> Wed</label>
+        <label class="weekday-chip"><input type="checkbox" value="4"> Thu</label>
+        <label class="weekday-chip"><input type="checkbox" value="5"> Fri</label>
+        <label class="weekday-chip"><input type="checkbox" value="6"> Sat</label>
+      </div>
+      <div class="field-hint">Public holidays are fetched automatically from Google Calendar (Pakistan).</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="generateBtn">Generate Workplan</button>
+    </div>
+  </section>
+
+  <section id="summarySection" class="hidden">
+    <p class="period-label" id="periodLabel"></p>
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div class="milestones" id="milestonesGrid"></div>
+  </section>
+
+  <section class="panel hidden" id="resultsPanel">
+    <h2 class="panel-title">Detailed Work Plans</h2>
+
+    <div class="toolbar no-print">
+      <div class="field">
+        <label for="searchInput">Search</label>
+        <input type="text" id="searchInput" placeholder="Date, day, activity, or remarks…">
+      </div>
+      <div class="field">
+        <label for="statusFilter">Filter by Status</label>
+        <select id="statusFilter">
+          <option value="all">All Rows</option>
+          <option value="training">Refresher / Training</option>
+          <option value="working">Working Day</option>
+          <option value="off">Off Day</option>
+          <option value="buffer">Buffer</option>
+        </select>
+      </div>
+      <div class="actions" style="margin-top: 1.5rem;">
+        <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
+        <button class="btn btn-secondary" id="exportDocBtn">Download DOC</button>
+        <button class="btn btn-secondary" id="printBtn">Print Report</button>
+      </div>
+    </div>
+
+    <div id="resultsContent">
+      <div class="empty-state">Select a district, configure parameters, and click Generate Workplan.</div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+const Config = {
+  API_KEY: "AIzaSyDpbIs8KDC6PjM2nNwWG-uORE-TvA0klx0",
+  CALENDAR_ID: "en.pk.official#holiday@group.v.calendar.google.com",
+  DAY_NAMES: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  MONTH_SHORT: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  PHASE_HH: "HH/GIRLS",
+  PHASE_TRK: "TRACKING",
+  DOC_COLORS: {
+    titleBg: "#1F3864",
+    titleFg: "#FFFFFF",
+    headerBg: "#2E75B6",
+    headerFg: "#FFFFFF",
+    training: "#DBE5F1",
+    workingA: "#FFFFFF",
+    workingB: "#DEEAF1",
+    off: "#F2F2F2",
+    buffer: "#FFF2CC",
+    total: "#FCE4D6",
+    border: "#B4C6E7",
+    text: "#1E293B",
+  },
+  BUFFER_REMARKS: [
+    "Resolution of tracking discrepancies",
+    "Data cleaning, reconciliation and verification",
+    "Finalization of verified tracking database",
+  ],
+};
+
+const Districts = {
+  dik: {
+    name: "D.I. Khan",
+    weekOffs: [5],
+    tracking: {
+      start: "2026-06-09",
+      girlsTarget: 1703,
+      staff: 12,
+      girlsPerStaff: 10,
+      refresherDays: 1,
+      bufferDays: 2,
+    },
+    hh: {
+      start: "2026-06-22",
+      schoolGirls: 1618,
+      staff: 12,
+      interviewsPerStaff: 4,
+      refresherDays: 1,
+      bufferDays: 0,
+    },
+  },
+  hangu: {
+    name: "Hangu",
+    weekOffs: [5],
+    tracking: {
+      start: "2026-06-09",
+      girlsTarget: 471,
+      staff: 6,
+      girlsPerStaff: 10,
+      refresherDays: 1,
+      bufferDays: 3,
+    },
+    hh: {
+      start: "2026-06-19",
+      schoolGirls: 447,
+      staff: 4,
+      interviewsPerStaff: 4,
+      refresherDays: 1,
+      bufferDays: 0,
+    },
+  },
+  lakki: {
+    name: "Lakki Marwat",
+    weekOffs: [5],
+    tracking: {
+      start: "2026-06-09",
+      girlsTarget: 1648,
+      staff: 8,
+      girlsPerStaff: 10,
+      refresherDays: 1,
+      bufferDays: 3,
+    },
+    hh: {
+      start: "2026-07-03",
+      schoolGirls: 1566,
+      staff: 8,
+      interviewsPerStaff: 4,
+      refresherDays: 1,
+      bufferDays: 0,
+    },
+  },
+  torghar: {
+    name: "Torghar",
+    weekOffs: [5],
+    tracking: {
+      start: "2026-06-09",
+      girlsTarget: 216,
+      staff: 6,
+      girlsPerStaff: 10,
+      refresherDays: 1,
+      bufferDays: 3,
+    },
+    hh: {
+      start: "2026-06-15",
+      schoolGirls: 205,
+      staff: 4,
+      interviewsPerStaff: 4,
+      refresherDays: 1,
+      bufferDays: 0,
+    },
+  },
+};
+
+const DateUtils = {
+  parseLocal(dateStr) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  },
+
+  format(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  },
+
+  formatDisplay(dateStr) {
+    if (!dateStr) return "";
+    const date = DateUtils.parseLocal(dateStr);
+    const d = String(date.getDate()).padStart(2, "0");
+    const mmm = Config.MONTH_SHORT[date.getMonth()];
+    const yyyy = date.getFullYear();
+    return `${d}-${mmm}-${yyyy}`;
+  },
+
+  dayName(dateStr) {
+    return Config.DAY_NAMES[DateUtils.parseLocal(dateStr).getDay()];
+  },
+
+  daysBetweenInclusive(startStr, endStr) {
+    const start = DateUtils.parseLocal(startStr);
+    const end = DateUtils.parseLocal(endStr);
+    return Math.floor((end - start) / 86_400_000) + 1;
+  },
+
+  eachDay(startStr, endStr, callback) {
+    const current = DateUtils.parseLocal(startStr);
+    const end = DateUtils.parseLocal(endStr);
+    while (current <= end) {
+      callback(DateUtils.format(current), current);
+      current.setDate(current.getDate() + 1);
+    }
+  },
+
+  addDays(dateStr, days) {
+    const d = DateUtils.parseLocal(dateStr);
+    d.setDate(d.getDate() + days);
+    return DateUtils.format(d);
+  },
+};
+
+const ApiService = {
+  async fetchHolidays(apiKey, startStr, endStr) {
+    const calendarId = encodeURIComponent(Config.CALENDAR_ID);
+    const timeMin = new Date(`${startStr}T00:00:00`).toISOString();
+    const endDate = DateUtils.parseLocal(endStr);
+    endDate.setDate(endDate.getDate() + 1);
+    const timeMax = endDate.toISOString();
+
+    const url =
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events` +
+      `?timeMin=${encodeURIComponent(timeMin)}` +
+      `&timeMax=${encodeURIComponent(timeMax)}` +
+      `&singleEvents=true` +
+      `&orderBy=startTime` +
+      `&key=${encodeURIComponent(apiKey)}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+      const msg = data?.error?.message || `HTTP ${response.status}`;
+      throw new Error(`Google Calendar API error: ${msg}`);
+    }
+
+    const map = new Map();
+    for (const item of data.items || []) {
+      if (!item.start?.date) continue;
+      map.set(item.start.date, item.summary || "Public Holiday");
+    }
+    return map;
+  },
+};
+
+const PhasePlanner = {
+  getDayStatus(dateStr, weekOffDays, holidayMap) {
+    const dayIndex = DateUtils.parseLocal(dateStr).getDay();
+    const isWeekOff = weekOffDays.includes(dayIndex);
+    const holidayName = holidayMap.get(dateStr) || null;
+    const isHoliday = Boolean(holidayName);
+
+    if (isHoliday && isWeekOff) return { status: "both", holidayName, isWeekOff };
+    if (isHoliday) return { status: "holiday", holidayName, isWeekOff };
+    if (isWeekOff) return { status: "weekoff", holidayName: null, isWeekOff };
+    return { status: "working", holidayName: null, isWeekOff };
+  },
+
+  isNonWorking(status) {
+    return status === "weekoff" || status === "holiday" || status === "both";
+  },
+
+  getOffRemark(dayStatus, holidayName) {
+    if (dayStatus === "both") return `${holidayName} + Weekly Off`;
+    if (dayStatus === "holiday") return holidayName;
+    if (dayStatus === "weekoff") return "Off Day";
+    return "";
+  },
+
+  getTrackingOffOutput(dayStatus, holidayName) {
+    if (dayStatus === "weekoff") return "No field activities - weekly rest day";
+    if (dayStatus === "both") return `No field activities - ${holidayName}`;
+    if (dayStatus === "holiday") return holidayName;
+    return "No field activities";
+  },
+
+  getTrackingStatusLabel(status, offType) {
+    if (status === "training") return "Training";
+    if (status === "working") return "Working Day";
+    if (status === "buffer") return "Buffer";
+    if (offType === "weekoff") return "Weekly Off";
+    if (offType === "holiday") return "Holiday";
+    if (offType === "both") return "Holiday";
+    return "Off";
+  },
+
+  formatSr(index) {
+    return String(index).padStart(2, "0");
+  },
+
+  estimateFetchEnd(startStr, target, dailyCapacity, refresherDays, bufferDays) {
+    const minWorking = Math.ceil(target / dailyCapacity);
+    const calendarBuffer = Math.ceil(minWorking * 2.5) + refresherDays + bufferDays + 90;
+    return DateUtils.addDays(startStr, calendarBuffer);
+  },
+
+  advanceDay(date) {
+    const d = DateUtils.parseLocal(date);
+    d.setDate(d.getDate() + 1);
+    return DateUtils.format(d);
+  },
+
+  buildTracking(params, holidayMap) {
+    const {
+      districtName,
+      startStr,
+      girlsTarget,
+      staff,
+      girlsPerStaff,
+      refresherDays,
+      bufferDays,
+      weekOffDays,
+    } = params;
+
+    const dailyCapacity = staff * girlsPerStaff;
+    const rows = [];
+    let current = startStr;
+    let sr = 1;
+    let remaining = girlsTarget;
+    let cumGirls = 0;
+    let lastCum = 0;
+    let workingDays = 0;
+
+    for (let i = 0; i < refresherDays; i++) {
+      rows.push({
+        sr: PhasePlanner.formatSr(sr++),
+        date: current,
+        dayName: DateUtils.dayName(current),
+        activity: "Refresher Training",
+        staff,
+        status: "training",
+        statusLabel: "Training",
+        plannedOutput: "Refresher training of field staff",
+        girls: "-",
+        cumGirls: "-",
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    while (remaining > 0) {
+      const { status, holidayName } = PhasePlanner.getDayStatus(current, weekOffDays, holidayMap);
+      if (PhasePlanner.isNonWorking(status)) {
+        rows.push({
+          sr: PhasePlanner.formatSr(sr++),
+          date: current,
+          dayName: DateUtils.dayName(current),
+          activity: status === "weekoff" ? "Weekly Off" : "Holiday",
+          staff: "-",
+          status: "off",
+          offType: status,
+          statusLabel: PhasePlanner.getTrackingStatusLabel("off", status),
+          plannedOutput: PhasePlanner.getTrackingOffOutput(status, holidayName),
+          girls: 0,
+          cumGirls: lastCum,
+        });
+      } else {
+        const girls = Math.min(remaining, dailyCapacity);
+        remaining -= girls;
+        cumGirls += girls;
+        workingDays += 1;
+        lastCum = cumGirls;
+        rows.push({
+          sr: PhasePlanner.formatSr(sr++),
+          date: current,
+          dayName: DateUtils.dayName(current),
+          activity: "Girls Tracking Exercise",
+          staff,
+          status: "working",
+          statusLabel: "Working Day",
+          plannedOutput: `Tracking & verification of approximately ${girls} girls`,
+          girls,
+          cumGirls,
+        });
+      }
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    for (let i = 0; i < bufferDays; i++) {
+      const remark = Config.BUFFER_REMARKS[i % Config.BUFFER_REMARKS.length];
+      rows.push({
+        sr: PhasePlanner.formatSr(sr++),
+        date: current,
+        dayName: DateUtils.dayName(current),
+        activity: "Buffer & Data Validation",
+        staff: "-",
+        status: "buffer",
+        statusLabel: "Buffer",
+        plannedOutput: remark,
+        girls: "-",
+        cumGirls: cumGirls,
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    const actualEnd = DateUtils.addDays(current, -1);
+    const offDays = rows.filter((r) => r.status === "off").length;
+
+    RowStyles.assignColors(rows);
+
+    const summary = {
+      phase: Config.PHASE_TRK,
+      phaseLabel: "Girls Tracking Exercise",
+      districtName,
+      startStr,
+      endStr: actualEnd,
+      calendarDays: DateUtils.daysBetweenInclusive(startStr, actualEnd),
+      workingDays,
+      offDays,
+      refresherDays,
+      bufferDays,
+      girlsTarget,
+      dailyCapacity,
+      staff,
+      avgDaily: workingDays ? Math.round(girlsTarget / workingDays) : 0,
+    };
+
+    return {
+      type: "tracking",
+      rows,
+      totals: { staff, girls: girlsTarget, cumGirls: girlsTarget },
+      summary,
+      milestones: [
+        { label: "Refresher Training", date: startStr, desc: `${refresherDays} refresher day(s) for field staff` },
+        { label: "Tracking Launch", date: rows.find((r) => r.status === "working")?.date, desc: "Start of girls tracking exercise" },
+        { label: "Tracking Completion", date: rows.filter((r) => r.status === "working").at(-1)?.date, desc: `All ${girlsTarget.toLocaleString()} girls tracked` },
+        { label: "Buffer Period", date: rows.find((r) => r.status === "buffer")?.date, desc: `${bufferDays} buffer day(s) for data validation` },
+      ],
+    };
+  },
+
+  buildHH(params, holidayMap) {
+    const {
+      districtName,
+      startStr,
+      schoolGirlsTarget,
+      staff,
+      interviewsPerStaff,
+      refresherDays,
+      bufferDays,
+      weekOffDays,
+    } = params;
+
+    const dailyCapacity = staff * interviewsPerStaff;
+    const rows = [];
+    let current = startStr;
+    let sr = 0;
+    let remaining = schoolGirlsTarget;
+    let cumGirls = 0;
+    let cumTotal = 0;
+    let lastCumGirls = 0;
+    let lastCumTotal = 0;
+    let workingDays = 0;
+
+    for (let i = 0; i < refresherDays; i++) {
+      const srLabel = refresherDays === 1 && i === 0 ? "i" : PhasePlanner.formatSr(i + 1);
+      rows.push({
+        sr: srLabel,
+        district: districtName,
+        phase: Config.PHASE_HH,
+        date: current,
+        dayName: DateUtils.dayName(current),
+        status: "training",
+        staff: "-",
+        schoolGirls: "-",
+        mothers: "-",
+        fathers: "-",
+        dailyTotal: "-",
+        cumGirls: "-",
+        cumTotal: "-",
+        remarks: "Refresher training for field staff",
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    while (remaining > 0) {
+      const { status, holidayName } = PhasePlanner.getDayStatus(current, weekOffDays, holidayMap);
+      if (PhasePlanner.isNonWorking(status)) {
+        rows.push({
+          sr: sr++,
+          district: districtName,
+          phase: Config.PHASE_HH,
+          date: current,
+          dayName: DateUtils.dayName(current),
+          status: "off",
+          offType: status,
+          staff: "Off",
+          schoolGirls: 0,
+          mothers: 0,
+          fathers: 0,
+          dailyTotal: 0,
+          cumGirls: lastCumGirls,
+          cumTotal: lastCumTotal,
+          remarks: PhasePlanner.getOffRemark(status, holidayName),
+        });
+      } else {
+        const girls = Math.min(remaining, dailyCapacity);
+        remaining -= girls;
+        cumGirls += girls;
+        cumTotal += girls * 3;
+        workingDays += 1;
+        lastCumGirls = cumGirls;
+        lastCumTotal = cumTotal;
+        rows.push({
+          sr: sr++,
+          district: districtName,
+          phase: Config.PHASE_HH,
+          date: current,
+          dayName: DateUtils.dayName(current),
+          status: "working",
+          staff,
+          schoolGirls: girls,
+          mothers: girls,
+          fathers: girls,
+          dailyTotal: girls * 3,
+          cumGirls,
+          cumTotal,
+          remarks: "",
+        });
+      }
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    for (let i = 0; i < bufferDays; i++) {
+      const remark = Config.BUFFER_REMARKS[i % Config.BUFFER_REMARKS.length];
+      rows.push({
+        sr: sr++,
+        district: districtName,
+        phase: Config.PHASE_HH,
+        date: current,
+        dayName: DateUtils.dayName(current),
+        status: "buffer",
+        staff: "-",
+        schoolGirls: "-",
+        mothers: "-",
+        fathers: "-",
+        dailyTotal: "-",
+        cumGirls: cumGirls,
+        cumTotal: cumTotal,
+        remarks: remark,
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    const actualEnd = DateUtils.addDays(current, -1);
+    const offDays = rows.filter((r) => r.status === "off").length;
+    const midTarget = Math.ceil(schoolGirlsTarget / 2);
+    let midDate = null;
+    let fieldLaunchDate = null;
+
+    for (const row of rows) {
+      if (row.status === "working" && !fieldLaunchDate) fieldLaunchDate = row.date;
+      if (row.status === "working" && row.cumGirls >= midTarget) {
+        midDate = row.date;
+        break;
+      }
+    }
+
+    for (const row of rows) {
+      if (row.status === "training") {
+        row.cumGirls = 0;
+        row.cumTotal = 0;
+      }
+    }
+
+    RowStyles.assignColors(rows);
+
+    const summary = {
+      phase: Config.PHASE_HH,
+      phaseLabel: "HH/GIRLS Interview Phase",
+      districtName,
+      startStr,
+      endStr: actualEnd,
+      calendarDays: DateUtils.daysBetweenInclusive(startStr, actualEnd),
+      workingDays,
+      offDays,
+      refresherDays,
+      bufferDays,
+      schoolGirlsTarget,
+      totalInterviews: schoolGirlsTarget * 3,
+      capacityPerCategory: dailyCapacity,
+      dailyInterviewsAvg: workingDays ? Math.round((schoolGirlsTarget * 3) / workingDays) : 0,
+      perCategoryAvg: workingDays ? Math.round(schoolGirlsTarget / workingDays) : 0,
+    };
+
+    return {
+      type: "hh",
+      rows,
+      totals: {
+        staff,
+        schoolGirls: schoolGirlsTarget,
+        mothers: schoolGirlsTarget,
+        fathers: schoolGirlsTarget,
+        dailyTotal: schoolGirlsTarget * 3,
+        cumGirls: schoolGirlsTarget,
+        cumTotal: schoolGirlsTarget * 3,
+      },
+      summary,
+      milestones: [
+        { label: "Field Launch", date: fieldLaunchDate || startStr, desc: `Start of HH/GIRLS data collection in ${districtName}` },
+        { label: "Mid-Point Review", date: midDate, desc: "Progress review — 50% of interviews expected complete" },
+        { label: "Final Field Day", date: rows.filter((r) => r.status === "working").at(-1)?.date, desc: "Last day of field data collection" },
+        { label: "Data Completion", date: actualEnd, desc: `All ${summary.totalInterviews.toLocaleString()} interviews collected` },
+      ],
+    };
+  },
+
+  buildFullPlan(trackingParams, hhParams, holidayMap, hhStartOptions = {}) {
+    const tracking = PhasePlanner.buildTracking(trackingParams, holidayMap);
+    const autoHhStart = PhasePlanner.advanceDay(tracking.summary.endStr);
+    const useAuto = hhStartOptions.auto !== false;
+    const hhStart = useAuto ? autoHhStart : (hhStartOptions.manualStart || autoHhStart);
+
+    if (!useAuto && hhStart < autoHhStart) {
+      throw new Error(
+        `HH start (${DateUtils.formatDisplay(hhStart)}) cannot be before the day after tracking ends (${DateUtils.formatDisplay(autoHhStart)}).`
+      );
+    }
+
+    const hh = PhasePlanner.buildHH({ ...hhParams, startStr: hhStart }, holidayMap);
+    hh.milestones.unshift({
+      label: "HH Phase Start",
+      date: hhStart,
+      desc: useAuto
+        ? `Auto — starts day after tracking ends (${DateUtils.formatDisplay(tracking.summary.endStr)} → ${DateUtils.formatDisplay(hhStart)})`
+        : "Custom HH start date",
+    });
+
+    return {
+      mode: "full",
+      districtName: trackingParams.districtName,
+      startStr: trackingParams.startStr,
+      endStr: hh.summary.endStr,
+      autoHhStart,
+      hhStartUsed: hhStart,
+      tracking,
+      hh,
+    };
+  },
+};
+
+const RowStyles = {
+  createState() {
+    return { workingIdx: 0 };
+  },
+
+  getBackground(row, state) {
+    const c = Config.DOC_COLORS;
+    if (row.status === "training") return c.training;
+    if (row.status === "buffer") return c.buffer;
+    if (row.status === "off") return c.off;
+    if (row.status === "working") {
+      state.workingIdx += 1;
+      return state.workingIdx % 2 === 1 ? c.workingA : c.workingB;
+    }
+    return c.off;
+  },
+
+  escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  },
+
+  assignColors(rows) {
+    const state = RowStyles.createState();
+    for (const row of rows) {
+      row.bgColor = RowStyles.getBackground(row, state);
+    }
+  },
+};
+
+const ExportService = {
+  downloadBlob(content, mime, filename) {
+    const blob = new Blob(content, { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+
+  trackingToCsv(plan) {
+    const header = ["#", "Date", "Day", "Activity", "Staff", "Status", "Planned Output"];
+    const rows = plan.rows.map((r) => [
+      r.sr,
+      DateUtils.formatDisplay(r.date),
+      r.dayName,
+      r.activity,
+      r.staff,
+      r.statusLabel,
+      r.plannedOutput,
+    ]);
+    const total = ["TOTAL", "", "", "", plan.totals.staff, "", `${plan.totals.girls} girls tracked`];
+    const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    return [header, ...rows, total].map((row) => row.map(escape).join(",")).join("\r\n");
+  },
+
+  hhToCsv(plan) {
+    const header = [
+      "Sr", "District", "Phase", "Date", "Day", "Staff",
+      "School Girls", "Girls' Mother", "Girls' Father",
+      "Daily Total", "Cumulative Girls", "Cumulative Total", "Remarks",
+    ];
+    const rows = plan.rows.map((r) => [
+      r.sr, r.district, r.phase, DateUtils.formatDisplay(r.date), r.dayName, r.staff,
+      r.schoolGirls, r.mothers, r.fathers, r.dailyTotal, r.cumGirls, r.cumTotal, r.remarks,
+    ]);
+    const t = plan.totals;
+    const total = ["TOTAL", plan.summary.districtName, Config.PHASE_HH, "", "", t.staff, t.schoolGirls, t.mothers, t.fathers, t.dailyTotal, t.cumGirls, t.cumTotal, ""];
+    const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    return [header, ...rows, total].map((row) => row.map(escape).join(",")).join("\r\n");
+  },
+
+  downloadCsv(plan) {
+    const { districtName, startStr, endStr } = ExportService.getPlanRange(plan);
+    let csv = "";
+    if (plan.mode === "full") {
+      csv = `${ExportService.trackingToCsv(plan.tracking)}\r\n\r\n${ExportService.hhToCsv(plan.hh)}`;
+    } else if (plan.mode === "tracking") {
+      csv = ExportService.trackingToCsv(plan.tracking);
+    } else {
+      csv = ExportService.hhToCsv(plan.hh);
+    }
+    ExportService.downloadBlob(
+      [csv],
+      "text/csv;charset=utf-8;",
+      `PIDC_Workplan_${districtName.replace(/\s+/g, "-")}_${startStr}_to_${endStr}.csv`
+    );
+  },
+
+  renderTableHtml(columns, rows, totalRow) {
+    const c = Config.DOC_COLORS;
+    const header = columns
+      .map((col) => `<td bgcolor="${c.headerBg}" style="background-color:${c.headerBg};color:${c.headerFg};font-weight:bold;border:1px solid ${c.border};padding:6px 8px;">${RowStyles.escapeHtml(col)}</td>`)
+      .join("");
+    const body = rows
+      .map((row) => {
+        const bg = row.bg || Config.DOC_COLORS.off;
+        const cells = row.cells
+          .map((val) => `<td bgcolor="${bg}" style="background-color:${bg};color:${c.text};border:1px solid ${c.border};padding:5px 8px;">${RowStyles.escapeHtml(val)}</td>`)
+          .join("");
+        return `<tr>${cells}</tr>`;
+      })
+      .join("");
+    const total = totalRow.cells
+      .map((val) => `<td bgcolor="${c.total}" style="background-color:${c.total};color:${c.text};font-weight:bold;border:1px solid ${c.border};padding:5px 8px;">${RowStyles.escapeHtml(val)}</td>`)
+      .join("");
+    return `<table cellspacing="0" cellpadding="0"><tr>${header}</tr>${body}<tr>${total}</tr></table>`;
+  },
+
+  trackingDocSection(plan) {
+    const s = plan.summary;
+    const title = `GIRLS TRACKING EXERCISE — District ${s.districtName}`;
+    const rows = plan.rows.map((r) => ({
+      bg: r.bgColor,
+      cells: [r.sr, DateUtils.formatDisplay(r.date), r.dayName, r.activity, r.staff, r.statusLabel, r.plannedOutput],
+    }));
+    const table = ExportService.renderTableHtml(
+      ["#", "Date", "Day", "Activity", "Staff", "Status", "Planned Output"],
+      rows,
+      { cells: ["TOTAL", "", "", "", plan.totals.staff, "", `${plan.totals.girls} girls tracked`] }
+    );
+    return ExportService.phaseDocBlock(title, s, plan.milestones, table);
+  },
+
+  hhDocSection(plan) {
+    const s = plan.summary;
+    const title = `DISTRICT ${s.districtName.toUpperCase()} - ${Config.PHASE_HH} PHASE`;
+    const rows = plan.rows.map((r) => ({
+      bg: r.bgColor,
+      cells: [r.sr, r.district, r.phase, DateUtils.formatDisplay(r.date), r.dayName, r.staff, r.schoolGirls, r.mothers, r.fathers, r.dailyTotal, r.cumGirls, r.cumTotal, r.remarks],
+    }));
+    const t = plan.totals;
+    const table = ExportService.renderTableHtml(
+      ["Sr", "District", "Phase", "Date", "Day", "Staff", "School Girls", "Girls' Mother", "Girls' Father", "Daily Total", "Cumulative Girls", "Cumulative Total", "Remarks"],
+      rows,
+      { cells: ["TOTAL", s.districtName, Config.PHASE_HH, "", "", t.staff, t.schoolGirls, t.mothers, t.fathers, t.dailyTotal, t.cumGirls, t.cumTotal, ""] }
+    );
+    return ExportService.phaseDocBlock(title, s, plan.milestones, table, true);
+  },
+
+  phaseDocBlock(title, summary, milestones, tableHtml, isHH = false) {
+    const c = Config.DOC_COLORS;
+    const meta = isHH
+      ? `Total Interviews: ${summary.totalInterviews.toLocaleString()} | Working Days: ${summary.workingDays} | Off Days: ${summary.offDays}`
+      : `Girls to Track: ${summary.girlsTarget.toLocaleString()} | Working Days: ${summary.workingDays} | Off Days: ${summary.offDays} | Buffer Days: ${summary.bufferDays}`;
+    const milestoneHtml = milestones
+      .map((m) => `<p style="margin:4px 0;font-size:10pt;"><strong>${RowStyles.escapeHtml(m.label)}</strong> — ${RowStyles.escapeHtml(m.date ? DateUtils.formatDisplay(m.date) : "N/A")}: ${RowStyles.escapeHtml(m.desc)}</p>`)
+      .join("");
+    return `
+      <div style="background-color:${c.titleBg};color:${c.titleFg};padding:10px 12px;margin:18px 0 8px;">
+        <h2 style="font-size:13pt;margin:0 0 6px;">${RowStyles.escapeHtml(title)}</h2>
+        <div style="font-size:10pt;">${RowStyles.escapeHtml(DateUtils.formatDisplay(summary.startStr))} to ${RowStyles.escapeHtml(DateUtils.formatDisplay(summary.endStr))} &nbsp;|&nbsp; ${meta}</div>
+      </div>
+      <div style="margin-bottom:10px;">${milestoneHtml}</div>
+      ${tableHtml}`;
+  },
+
+  buildDocHtml(plan) {
+    const c = Config.DOC_COLORS;
+    const { districtName, startStr, endStr } = ExportService.getPlanRange(plan);
+    const calendarDays = DateUtils.daysBetweenInclusive(startStr, endStr);
+    let totalOffDays = 0;
+    if (plan.tracking) totalOffDays += plan.tracking.summary.offDays;
+    if (plan.hh) totalOffDays += plan.hh.summary.offDays;
+    let body = "";
+    if (plan.mode === "full" || plan.mode === "tracking") body += ExportService.trackingDocSection(plan.tracking);
+    if (plan.mode === "full" || plan.mode === "hh") body += ExportService.hhDocSection(plan.hh);
+
+    return `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8"><title>PIDC Workplan - ${RowStyles.escapeHtml(districtName)}</title>
+<style>@page { size: A4 landscape; margin: 1.2cm; } body { font-family: Calibri, "Segoe UI", Arial, sans-serif; color: ${c.text}; } table { border-collapse: collapse; width: 100%; font-size: 8.5pt; margin-bottom: 12px; }</style>
+</head>
+<body>
+  <h1 style="font-size:15pt;color:${c.titleBg};margin:0 0 4px;">PIDC Workplan — ${RowStyles.escapeHtml(districtName)}</h1>
+  <p style="font-size:10pt;margin:0 0 14px;">Overall period: ${RowStyles.escapeHtml(DateUtils.formatDisplay(startStr))} to ${RowStyles.escapeHtml(DateUtils.formatDisplay(endStr))} &nbsp;|&nbsp; ${calendarDays} calendar days &nbsp;|&nbsp; ${totalOffDays} off days</p>
+  ${body}
+</body></html>`;
+  },
+
+  getPlanRange(plan) {
+    if (plan.mode === "full") {
+      return { districtName: plan.districtName, startStr: plan.startStr, endStr: plan.endStr };
+    }
+    if (plan.mode === "tracking") {
+      return { districtName: plan.tracking.summary.districtName, startStr: plan.tracking.summary.startStr, endStr: plan.tracking.summary.endStr };
+    }
+    return { districtName: plan.hh.summary.districtName, startStr: plan.hh.summary.startStr, endStr: plan.hh.summary.endStr };
+  },
+
+  downloadDoc(plan) {
+    const html = ExportService.buildDocHtml(plan);
+    const { districtName, startStr, endStr } = ExportService.getPlanRange(plan);
+    ExportService.downloadBlob(
+      ["\ufeff", html],
+      "application/msword;charset=utf-8",
+      `PIDC_Workplan_${districtName.replace(/\s+/g, "-")}_${startStr}_to_${endStr}.doc`
+    );
+  },
+};
+
+const UIRenderer = {
+  rowClass(row) {
+    if (row.status === "training") return "row-training";
+    if (row.status === "working") return "row-working";
+    if (row.status === "buffer") return "row-buffer";
+    if (row.offType === "holiday") return "row-holiday";
+    if (row.offType === "weekoff") return "row-weekoff";
+    if (row.offType === "both") return "row-both";
+    return "row-off";
+  },
+
+  renderCombinedSummary(plan) {
+    const { districtName, startStr, endStr, mode } = plan;
+    const calendarDays = DateUtils.daysBetweenInclusive(startStr, endStr);
+
+    let totalOffDays = 0;
+    if (plan.tracking) totalOffDays += plan.tracking.summary.offDays;
+    if (plan.hh) totalOffDays += plan.hh.summary.offDays;
+
+    document.getElementById("periodLabel").textContent =
+      `${districtName} — ${DateUtils.formatDisplay(startStr)} → ${DateUtils.formatDisplay(endStr)} (${calendarDays} calendar days, ${totalOffDays} off days)`;
+
+    let cards = `
+      <div class="summary-card off"><div class="label">Total Off Days</div><div class="value">${totalOffDays}</div></div>`;
+
+    if (mode === "full" || mode === "tracking") {
+      const t = plan.tracking.summary;
+      cards += `
+        <div class="summary-card total"><div class="label">Girls to Track</div><div class="value">${t.girlsTarget.toLocaleString()}</div></div>
+        <div class="summary-card working"><div class="label">Tracking Working Days</div><div class="value">${t.workingDays}</div></div>
+        <div class="summary-card off"><div class="label">Tracking Off Days</div><div class="value">${t.offDays}</div></div>
+        <div class="summary-card"><div class="label">Tracking Daily Capacity</div><div class="value">${t.dailyCapacity}</div></div>
+        <div class="summary-card"><div class="label">Refresher Days</div><div class="value">${t.refresherDays}</div></div>
+        <div class="summary-card"><div class="label">Tracking Buffer Days</div><div class="value">${t.bufferDays}</div></div>`;
+    }
+    if (mode === "full" || mode === "hh") {
+      const h = plan.hh.summary;
+      cards += `
+        <div class="summary-card girls"><div class="label">School Girls (HH)</div><div class="value">${h.schoolGirlsTarget.toLocaleString()}</div></div>
+        <div class="summary-card working"><div class="label">HH Working Days</div><div class="value">${h.workingDays}</div></div>
+        <div class="summary-card off"><div class="label">HH Off Days</div><div class="value">${h.offDays}</div></div>
+        <div class="summary-card total"><div class="label">Total Interviews</div><div class="value">${h.totalInterviews.toLocaleString()}</div></div>
+        <div class="summary-card"><div class="label">HH Daily Capacity</div><div class="value">${h.capacityPerCategory}</div></div>
+        <div class="summary-card"><div class="label">HH Refresher Days</div><div class="value">${h.refresherDays}</div></div>
+        ${h.bufferDays > 0 ? `<div class="summary-card"><div class="label">HH Buffer Days</div><div class="value">${h.bufferDays}</div></div>` : ""}`;
+    }
+    document.getElementById("summaryGrid").innerHTML = cards;
+  },
+
+  renderMilestones(plan) {
+    const items = [];
+    if (plan.mode === "full" || plan.mode === "tracking") items.push(...plan.tracking.milestones);
+    if (plan.mode === "full" || plan.mode === "hh") items.push(...plan.hh.milestones);
+    document.getElementById("milestonesGrid").innerHTML = items
+      .map((m) => `<div class="milestone-item"><strong>${m.label}</strong> — ${m.date ? DateUtils.formatDisplay(m.date) : "N/A"}<div style="color:var(--text-muted);margin-top:0.2rem;">${m.desc}</div></div>`)
+      .join("");
+  },
+
+  renderTrackingTable(rows, totals, districtName) {
+    if (!rows.length) return `<div class="empty-state">No tracking rows match your filter.</div>`;
+    const body = rows.map((r) => `
+      <tr class="${UIRenderer.rowClass(r)}" style="background-color:${r.bgColor || Config.DOC_COLORS.off};">
+        <td>${r.sr}</td>
+        <td><strong>${DateUtils.formatDisplay(r.date)}</strong></td>
+        <td>${r.dayName}</td>
+        <td>${r.activity}</td>
+        <td>${r.staff}</td>
+        <td><span class="badge badge-${r.status === "buffer" ? "buffer" : r.status === "training" ? "training" : r.status === "working" ? "working" : "off"}">${r.statusLabel}</span></td>
+        <td>${r.plannedOutput}</td>
+      </tr>`).join("");
+    return `
+      <div class="results-phase plan-table-wrap">
+        <div class="doc-title-bar">GIRLS TRACKING EXERCISE — District ${districtName.toUpperCase()}</div>
+        <div class="table-wrap"><table class="plan-table">
+          <thead><tr><th>#</th><th>Date</th><th>Day</th><th>Activity</th><th>Staff</th><th>Status</th><th>Planned Output</th></tr></thead>
+          <tbody>${body}
+            <tr class="row-total"><td>TOTAL</td><td></td><td></td><td></td><td>${totals.staff}</td><td></td><td>${totals.girls} girls tracked</td></tr>
+          </tbody>
+        </table></div>
+      </div>`;
+  },
+
+  renderHHTable(rows, totals, districtName) {
+    if (!rows.length) return `<div class="empty-state">No HH rows match your filter.</div>`;
+    const body = rows.map((r) => `
+      <tr class="${UIRenderer.rowClass(r)}" style="background-color:${r.bgColor || Config.DOC_COLORS.off};">
+        <td>${r.sr}</td><td>${r.district}</td><td>${r.phase}</td>
+        <td><strong>${DateUtils.formatDisplay(r.date)}</strong></td><td>${r.dayName}</td><td>${r.staff}</td>
+        <td>${r.schoolGirls}</td><td>${r.mothers}</td><td>${r.fathers}</td>
+        <td>${r.dailyTotal}</td><td>${r.cumGirls}</td><td>${r.cumTotal}</td><td>${r.remarks}</td>
+      </tr>`).join("");
+    return `
+      <div class="results-phase plan-table-wrap">
+        <div class="doc-title-bar">DISTRICT ${districtName.toUpperCase()} - ${Config.PHASE_HH} PHASE</div>
+        <div class="table-wrap"><table class="plan-table">
+          <thead><tr><th>Sr</th><th>District</th><th>Phase</th><th>Date</th><th>Day</th><th>Staff</th><th>School Girls</th><th>Mother</th><th>Father</th><th>Daily Total</th><th>Cum. Girls</th><th>Cum. Total</th><th>Remarks</th></tr></thead>
+          <tbody>${body}
+            <tr class="row-total"><td>TOTAL</td><td>${districtName}</td><td>${Config.PHASE_HH}</td><td></td><td></td><td>${totals.staff}</td><td>${totals.schoolGirls}</td><td>${totals.mothers}</td><td>${totals.fathers}</td><td>${totals.dailyTotal}</td><td>${totals.cumGirls}</td><td>${totals.cumTotal}</td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>`;
+  },
+
+  renderResults(plan, filteredTracking, filteredHH) {
+    let html = "";
+    if (plan.mode === "full" || plan.mode === "tracking") {
+      html += UIRenderer.renderTrackingTable(filteredTracking, plan.tracking.totals, plan.tracking.summary.districtName);
+    }
+    if (plan.mode === "full" || plan.mode === "hh") {
+      html += UIRenderer.renderHHTable(filteredHH, plan.hh.totals, plan.hh.summary.districtName);
+    }
+    document.getElementById("resultsContent").innerHTML = html;
+  },
+
+  showLoading() {
+    document.getElementById("resultsContent").innerHTML =
+      `<div class="loading-state"><span class="spinner"></span>Fetching holidays and building workplan…</div>`;
+  },
+
+  showError(message) {
+    document.getElementById("resultsContent").innerHTML =
+      `<div class="error-state"><strong>Error:</strong> ${message}</div>`;
+  },
+};
+
+const DatePicker = {
+  instances: new Map(),
+
+  init(pickerId, initialValue = "", onChange = null) {
+    const wrap = document.getElementById(pickerId);
+    const hidden = wrap.querySelector('input[type="hidden"]');
+    const display = wrap.querySelector(".date-picker-display");
+    const popup = wrap.querySelector(".date-picker-popup");
+    const monthLabel = wrap.querySelector(".date-picker-month-year");
+    const daysGrid = wrap.querySelector(".date-picker-days");
+
+    const state = {
+      viewDate: initialValue ? DateUtils.parseLocal(initialValue) : new Date(),
+      selected: initialValue,
+    };
+
+    const close = () => popup.classList.add("hidden");
+
+    const setValue = (isoDate) => {
+      state.selected = isoDate;
+      hidden.value = isoDate;
+      display.value = isoDate ? DateUtils.formatDisplay(isoDate) : "";
+      if (isoDate) state.viewDate = DateUtils.parseLocal(isoDate);
+      render();
+      if (onChange) onChange(isoDate);
+    };
+
+    const render = () => {
+      const year = state.viewDate.getFullYear();
+      const month = state.viewDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const todayStr = DateUtils.format(new Date());
+
+      monthLabel.textContent = `${Config.MONTH_SHORT[month]} ${year}`;
+
+      let html = "";
+      for (let i = 0; i < firstDay; i++) html += '<span class="date-picker-day empty"></span>';
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = DateUtils.format(new Date(year, month, day));
+        const classes = ["date-picker-day"];
+        if (iso === state.selected) classes.push("selected");
+        if (iso === todayStr) classes.push("today");
+        html += `<button type="button" class="${classes.join(" ")}" data-date="${iso}">${day}</button>`;
+      }
+      daysGrid.innerHTML = html;
+    };
+
+    const open = () => {
+      DatePicker.closeAllExcept(pickerId);
+      popup.classList.remove("hidden");
+      if (state.selected) state.viewDate = DateUtils.parseLocal(state.selected);
+      render();
+    };
+
+    display.addEventListener("click", open);
+    wrap.querySelector(".date-picker-icon").addEventListener("click", (e) => {
+      e.stopPropagation();
+      popup.classList.contains("hidden") ? open() : close();
+    });
+
+    wrap.querySelector(".date-picker-nav.prev").addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.viewDate = new Date(state.viewDate.getFullYear(), state.viewDate.getMonth() - 1, 1);
+      render();
+    });
+
+    wrap.querySelector(".date-picker-nav.next").addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.viewDate = new Date(state.viewDate.getFullYear(), state.viewDate.getMonth() + 1, 1);
+      render();
+    });
+
+    daysGrid.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-date]");
+      if (!btn) return;
+      e.stopPropagation();
+      setValue(btn.dataset.date);
+      close();
+    });
+
+    wrap.querySelector(".date-picker-today").addEventListener("click", (e) => {
+      e.stopPropagation();
+      setValue(DateUtils.format(new Date()));
+      close();
+    });
+
+    wrap.querySelector(".date-picker-clear").addEventListener("click", (e) => {
+      e.stopPropagation();
+      setValue("");
+      close();
+    });
+
+    popup.addEventListener("click", (e) => e.stopPropagation());
+    if (initialValue) setValue(initialValue);
+    DatePicker.instances.set(pickerId, { close, setValue });
+  },
+
+  closeAllExcept(exceptId) {
+    DatePicker.instances.forEach((inst, id) => {
+      if (id !== exceptId) inst.close();
+    });
+  },
+
+  closeAll() {
+    DatePicker.instances.forEach((inst) => inst.close());
+  },
+
+  setDate(pickerId, isoDate) {
+    const inst = DatePicker.instances.get(pickerId);
+    if (inst) inst.setValue(isoDate);
+  },
+};
+
+document.addEventListener("click", () => {
+  DatePicker.closeAll();
+  CustomSelect.closeAll();
+});
+
+const CustomSelect = {
+  instances: new Map(),
+
+  chevronSvg() {
+    return `<svg class="custom-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+  },
+
+  init(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select || CustomSelect.instances.has(selectId)) return;
+
+    select.classList.add("native-select-hidden");
+
+    const wrap = document.createElement("div");
+    wrap.className = "custom-select";
+    select.parentNode.insertBefore(wrap, select);
+    wrap.appendChild(select);
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "custom-select-trigger";
+    trigger.setAttribute("aria-haspopup", "listbox");
+    trigger.setAttribute("aria-expanded", "false");
+
+    const menu = document.createElement("div");
+    menu.className = "custom-select-menu hidden";
+    menu.setAttribute("role", "listbox");
+
+    wrap.appendChild(trigger);
+    wrap.appendChild(menu);
+
+    const renderOptions = () => {
+      menu.innerHTML = "";
+      [...select.options].forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "custom-select-option";
+        btn.dataset.value = opt.value;
+        btn.textContent = opt.textContent;
+        btn.setAttribute("role", "option");
+        if (opt.value === select.value) btn.classList.add("selected");
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          CustomSelect.setValue(selectId, opt.value);
+          CustomSelect.close(selectId);
+        });
+        menu.appendChild(btn);
+      });
+    };
+
+    const updateTrigger = () => {
+      const selected = select.options[select.selectedIndex];
+      trigger.innerHTML = `<span>${selected ? selected.textContent : "Select…"}</span>${CustomSelect.chevronSvg()}`;
+    };
+
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = wrap.classList.contains("open");
+      CustomSelect.closeAll();
+      if (!isOpen) {
+        wrap.classList.add("open");
+        menu.classList.remove("hidden");
+        trigger.setAttribute("aria-expanded", "true");
+        renderOptions();
+      }
+    });
+
+    updateTrigger();
+    CustomSelect.instances.set(selectId, { wrap, trigger, menu, updateTrigger, renderOptions });
+
+    select.addEventListener("change", updateTrigger);
+  },
+
+  setValue(selectId, value) {
+    const select = document.getElementById(selectId);
+    const inst = CustomSelect.instances.get(selectId);
+    if (!select) return;
+    select.value = value;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    if (inst) inst.updateTrigger();
+  },
+
+  close(selectId) {
+    const inst = CustomSelect.instances.get(selectId);
+    if (!inst) return;
+    inst.wrap.classList.remove("open");
+    inst.menu.classList.add("hidden");
+    inst.trigger.setAttribute("aria-expanded", "false");
+  },
+
+  closeAll() {
+    CustomSelect.instances.forEach((_, id) => CustomSelect.close(id));
+  },
+};
+
+const App = {
+  plan: null,
+
+  init() {
+    CustomSelect.init("districtSelect");
+    CustomSelect.init("planMode");
+    CustomSelect.init("statusFilter");
+
+    document.getElementById("planMode").value = "full";
+    CustomSelect.setValue("planMode", "full");
+    DatePicker.init("startDatePicker", Districts.dik.tracking.start, () => App.clearEndDates());
+    DatePicker.init("hhStartDatePicker", "", () => App.clearEndDates());
+    App.setWeekOffs(Districts.dik.weekOffs);
+    App.applyDistrictPreset();
+    App.updatePhaseVisibility();
+    App.updateHhStartUi();
+    App.clearEndDates();
+
+    document.getElementById("districtSelect").addEventListener("change", () => {
+      App.applyDistrictPreset();
+      App.applyStartDateForMode();
+      App.clearEndDates();
+    });
+    document.getElementById("planMode").addEventListener("change", () => {
+      App.updatePhaseVisibility();
+      App.applyStartDateForMode();
+      App.clearEndDates();
+    });
+    document.getElementById("hhStartAuto").addEventListener("change", () => {
+      App.updateHhStartUi();
+      App.clearEndDates();
+    });
+    document.getElementById("generateBtn").addEventListener("click", () => App.generate());
+
+    const watchIds = [
+      "trkGirlsTarget", "trkStaff", "trkGirlsPerStaff", "trkRefresherDays", "trkBufferDays",
+      "hhSchoolGirls", "hhStaff", "hhInterviewsPerStaff", "hhRefresherDays", "hhBufferDays",
+    ];
+    watchIds.forEach((id) => document.getElementById(id).addEventListener("change", () => App.clearEndDates()));
+    document.querySelectorAll("#weekdayCheckboxes input").forEach((el) => {
+      el.addEventListener("change", () => App.clearEndDates());
+    });
+
+    document.getElementById("searchInput").addEventListener("input", () => App.applyFilters());
+    document.getElementById("statusFilter").addEventListener("change", () => App.applyFilters());
+    document.getElementById("exportCsvBtn").addEventListener("click", () => App.exportCsv());
+    document.getElementById("exportDocBtn").addEventListener("click", () => App.exportDoc());
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+  },
+
+  updatePhaseVisibility() {
+    const mode = document.getElementById("planMode").value;
+    document.getElementById("trackingConfig").classList.toggle("hidden", mode === "hh");
+    document.getElementById("hhConfig").classList.toggle("hidden", mode === "tracking");
+    document.getElementById("hhStartField").classList.toggle("hidden", mode !== "full");
+    App.updateHhStartUi();
+  },
+
+  updateHhStartUi() {
+    const mode = document.getElementById("planMode").value;
+    const auto = document.getElementById("hhStartAuto").checked;
+    const isFull = mode === "full";
+    const manualWrap = document.getElementById("hhStartManualWrap");
+    const autoDisplay = document.getElementById("hhStartAutoDisplay");
+
+    manualWrap.classList.toggle("hidden", !isFull || auto);
+    autoDisplay.classList.toggle("hidden", !isFull || !auto);
+
+    document.getElementById("hhStartHint").textContent = auto
+      ? "HH begins the calendar day after tracking buffer ends (no gap)."
+      : "Pick a custom HH start date (must be on or after the day after tracking ends).";
+  },
+
+  setWeekOffs(days) {
+    document.querySelectorAll("#weekdayCheckboxes input").forEach((el) => {
+      el.checked = days.includes(Number(el.value));
+    });
+  },
+
+  getSelectedWeekOffs() {
+    return [...document.querySelectorAll("#weekdayCheckboxes input:checked")].map((el) => Number(el.value));
+  },
+
+  applyDistrictPreset() {
+    const key = document.getElementById("districtSelect").value;
+    if (key === "custom") return;
+    const d = Districts[key];
+    const t = d.tracking;
+    const h = d.hh;
+    document.getElementById("trkGirlsTarget").value = t.girlsTarget;
+    document.getElementById("trkStaff").value = t.staff;
+    document.getElementById("trkGirlsPerStaff").value = t.girlsPerStaff;
+    document.getElementById("trkRefresherDays").value = t.refresherDays;
+    document.getElementById("trkBufferDays").value = t.bufferDays;
+    document.getElementById("hhSchoolGirls").value = h.schoolGirls;
+    document.getElementById("hhStaff").value = h.staff;
+    document.getElementById("hhInterviewsPerStaff").value = h.interviewsPerStaff;
+    document.getElementById("hhRefresherDays").value = h.refresherDays;
+    document.getElementById("hhBufferDays").value = h.bufferDays;
+    DatePicker.setDate("startDatePicker", t.start);
+    App.setWeekOffs(d.weekOffs);
+    App.applyStartDateForMode();
+  },
+
+  applyStartDateForMode() {
+    const key = document.getElementById("districtSelect").value;
+    if (key === "custom") return;
+    const mode = document.getElementById("planMode").value;
+    const d = Districts[key];
+    const start = mode === "hh" ? d.hh.start : d.tracking.start;
+    DatePicker.setDate("startDatePicker", start);
+  },
+
+  clearEndDates() {
+    ["endDate", "endDateDisplay", "trkEndDateDisplay", "hhEndDateDisplay"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.tagName === "INPUT") {
+        el.value = "";
+        if (id.includes("Display")) el.placeholder = "Auto-calculated";
+      }
+    });
+  },
+
+  setEndDates(plan) {
+    const range = ExportService.getPlanRange(plan);
+    document.getElementById("endDate").value = range.endStr;
+    document.getElementById("endDateDisplay").value = DateUtils.formatDisplay(range.endStr);
+    if (plan.tracking) {
+      document.getElementById("trkEndDateDisplay").value = DateUtils.formatDisplay(plan.tracking.summary.endStr);
+    }
+    if (plan.hh) {
+      document.getElementById("hhEndDateDisplay").value = DateUtils.formatDisplay(plan.hh.summary.endStr);
+    }
+    if (plan.mode === "full") {
+      const autoDisplay = document.getElementById("hhStartAutoDisplay");
+      autoDisplay.value = DateUtils.formatDisplay(plan.autoHhStart);
+      if (!document.getElementById("hhStartAuto").checked) {
+        DatePicker.setDate("hhStartDatePicker", plan.hhStartUsed);
+      }
+    }
+  },
+
+  getDistrictName() {
+    const key = document.getElementById("districtSelect").value;
+    return key === "custom" ? "Custom District" : Districts[key].name;
+  },
+
+  readInputs() {
+    const mode = document.getElementById("planMode").value;
+    const startStr = document.getElementById("startDate").value;
+    const districtName = App.getDistrictName();
+    const weekOffDays = App.getSelectedWeekOffs();
+
+    const tracking = {
+      districtName,
+      startStr,
+      girlsTarget: Number(document.getElementById("trkGirlsTarget").value),
+      staff: Number(document.getElementById("trkStaff").value),
+      girlsPerStaff: Number(document.getElementById("trkGirlsPerStaff").value),
+      refresherDays: Number(document.getElementById("trkRefresherDays").value),
+      bufferDays: Number(document.getElementById("trkBufferDays").value),
+      weekOffDays,
+    };
+
+    const hh = {
+      districtName,
+      startStr,
+      schoolGirlsTarget: Number(document.getElementById("hhSchoolGirls").value),
+      staff: Number(document.getElementById("hhStaff").value),
+      interviewsPerStaff: Number(document.getElementById("hhInterviewsPerStaff").value),
+      refresherDays: Number(document.getElementById("hhRefresherDays").value),
+      bufferDays: Number(document.getElementById("hhBufferDays").value),
+      weekOffDays,
+    };
+
+    return {
+      mode,
+      startStr,
+      tracking,
+      hh,
+      hhStartAuto: document.getElementById("hhStartAuto").checked,
+      hhStartManual: document.getElementById("hhStartDate").value,
+    };
+  },
+
+  validateInputs(input) {
+    if (!input.startStr) {
+      alert("Please select a project start date.");
+      return false;
+    }
+    if (input.mode !== "hh") {
+      if (!input.tracking.girlsTarget || input.tracking.girlsTarget < 1) {
+        alert("Please enter a valid girls-to-track target.");
+        return false;
+      }
+      if (!input.tracking.staff || input.tracking.staff < 1 || !input.tracking.girlsPerStaff || input.tracking.girlsPerStaff < 1) {
+        alert("Please enter valid tracking staff and girls-per-tracker values.");
+        return false;
+      }
+      if (input.tracking.refresherDays < 0 || input.tracking.bufferDays < 0) {
+        alert("Refresher and buffer days cannot be negative.");
+        return false;
+      }
+    }
+    if (input.mode !== "tracking") {
+      if (!input.hh.schoolGirlsTarget || input.hh.schoolGirlsTarget < 1) {
+        alert("Please enter a valid School Girls target.");
+        return false;
+      }
+      if (!input.hh.staff || input.hh.staff < 1 || !input.hh.interviewsPerStaff || input.hh.interviewsPerStaff < 1) {
+        alert("Please enter valid HH staff and interview counts.");
+        return false;
+      }
+      if (input.hh.refresherDays < 0 || input.hh.bufferDays < 0) {
+        alert("HH refresher and buffer days cannot be negative.");
+        return false;
+      }
+    }
+    if (input.mode === "full" && !input.hhStartAuto && !input.hhStartManual) {
+      alert("Please select a custom HH start date, or enable Auto start.");
+      return false;
+    }
+    return true;
+  },
+
+  estimateFetchEnd(input) {
+    let end = input.startStr;
+    if (input.mode !== "hh") {
+      const t = input.tracking;
+      end = PhasePlanner.estimateFetchEnd(
+        input.startStr,
+        t.girlsTarget,
+        t.staff * t.girlsPerStaff,
+        t.refresherDays,
+        t.bufferDays
+      );
+    }
+    if (input.mode !== "tracking") {
+      const h = input.hh;
+      const hhEnd = PhasePlanner.estimateFetchEnd(
+        input.startStr,
+        h.schoolGirlsTarget,
+        h.staff * h.interviewsPerStaff,
+        h.refresherDays,
+        h.bufferDays
+      );
+      if (hhEnd > end) end = hhEnd;
+    }
+    if (input.mode === "full") {
+      end = DateUtils.addDays(end, 120);
+    }
+    return end;
+  },
+
+  async generate() {
+    const input = App.readInputs();
+    if (!App.validateInputs(input)) return;
+
+    document.getElementById("summarySection").classList.remove("hidden");
+    document.getElementById("resultsPanel").classList.remove("hidden");
+    UIRenderer.showLoading();
+
+    const btn = document.getElementById("generateBtn");
+    btn.disabled = true;
+
+    try {
+      const fetchEnd = App.estimateFetchEnd(input);
+      const holidayMap = await ApiService.fetchHolidays(Config.API_KEY, input.startStr, fetchEnd);
+
+      let plan;
+      if (input.mode === "full") {
+        plan = PhasePlanner.buildFullPlan(input.tracking, input.hh, holidayMap, {
+          auto: input.hhStartAuto,
+          manualStart: input.hhStartManual,
+        });
+      } else if (input.mode === "tracking") {
+        const tracking = PhasePlanner.buildTracking(input.tracking, holidayMap);
+        plan = { mode: "tracking", districtName: input.tracking.districtName, startStr: tracking.summary.startStr, endStr: tracking.summary.endStr, tracking };
+      } else {
+        const hh = PhasePlanner.buildHH(input.hh, holidayMap);
+        plan = { mode: "hh", districtName: input.hh.districtName, startStr: hh.summary.startStr, endStr: hh.summary.endStr, hh };
+      }
+
+      App.plan = plan;
+      App.setEndDates(plan);
+      UIRenderer.renderCombinedSummary(plan);
+      UIRenderer.renderMilestones(plan);
+      document.getElementById("searchInput").value = "";
+      document.getElementById("statusFilter").value = "all";
+      App.applyFilters();
+    } catch (err) {
+      UIRenderer.showError(err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  },
+
+  rowMatchesFilter(row, query, status) {
+    const haystack = [
+      row.date,
+      DateUtils.formatDisplay(row.date),
+      row.dayName,
+      row.activity,
+      row.statusLabel,
+      row.plannedOutput,
+      row.remarks,
+      row.phase,
+      row.district,
+      String(row.sr),
+    ].filter(Boolean).join(" ").toLowerCase();
+    const matchesStatus = status === "all" || row.status === status;
+    const matchesSearch = !query || haystack.includes(query);
+    return matchesStatus && matchesSearch;
+  },
+
+  applyFilters() {
+    if (!App.plan) return;
+    const query = document.getElementById("searchInput").value.trim().toLowerCase();
+    const status = document.getElementById("statusFilter").value;
+
+    const filteredTracking = App.plan.tracking
+      ? App.plan.tracking.rows.filter((r) => App.rowMatchesFilter(r, query, status))
+      : [];
+    const filteredHH = App.plan.hh
+      ? App.plan.hh.rows.filter((r) => App.rowMatchesFilter(r, query, status))
+      : [];
+
+    UIRenderer.renderResults(App.plan, filteredTracking, filteredHH);
+  },
+
+  exportCsv() {
+    if (!App.plan) {
+      alert("No data to export. Generate a workplan first.");
+      return;
+    }
+    ExportService.downloadCsv(App.plan);
+  },
+
+  exportDoc() {
+    if (!App.plan) {
+      alert("No data to export. Generate a workplan first.");
+      return;
+    }
+    ExportService.downloadDoc(App.plan);
+  },
+};
+
+App.init();
+</script>
+
+</body>
+</html>
