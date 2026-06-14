@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PIDC Workplan Maker</title>
+  <link rel="icon" href="https://www.pidc.org.pk/images/logo.png" type="image/png">
+  <link rel="shortcut icon" href="https://www.pidc.org.pk/images/logo.png" type="image/png">
   <style>
     :root {
       --bg: #f0f2f5;
@@ -286,6 +288,16 @@
 
     .checkbox-field input { accent-color: var(--primary); width: 1rem; height: 1rem; }
 
+    .field .checkbox-field {
+      margin-top: 0.35rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .field-checkbox .checkbox-field {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
     .actions {
       display: flex;
       flex-wrap: wrap;
@@ -413,42 +425,37 @@
       color: var(--primary);
     }
 
-    .hh-dates-row {
+    .project-dates-row {
       display: grid;
-      grid-template-columns: minmax(220px, 1.1fr) minmax(200px, 1fr) minmax(200px, 1fr);
+      grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr);
       gap: 1rem;
-      align-items: end;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
+      align-items: start;
     }
 
-    .hh-dates-row .field-checkbox .checkbox-field {
-      margin-top: 0;
-      min-height: 2.45rem;
-      padding: 0.55rem 0;
-      font-size: 0.85rem;
-      line-height: 1.35;
+    .project-dates-row .field {
+      margin-bottom: 0;
     }
 
-    .hh-dates-hint {
+    .project-dates-hint {
       grid-column: 1 / -1;
       margin-top: -0.25rem;
     }
 
-    .hh-start-input {
+    .project-date-input,
+    .project-dates-row .calculated-date {
       min-height: 2.45rem;
+      box-sizing: border-box;
+    }
+
+    .project-dates-row .date-picker-display {
+      min-height: 2.45rem;
+      box-sizing: border-box;
     }
 
     @media (max-width: 900px) {
-      .hh-dates-row {
+      .project-dates-row {
         grid-template-columns: 1fr;
         align-items: stretch;
-      }
-
-      .hh-dates-row .field-checkbox .checkbox-field {
-        min-height: auto;
-        padding: 0;
       }
     }
 
@@ -779,10 +786,6 @@
           <label for="trkBufferDays">Buffer Days (end)</label>
           <input type="number" id="trkBufferDays" min="0" value="2">
         </div>
-        <div class="field">
-          <label>Tracking End Date</label>
-          <input type="text" id="trkEndDateDisplay" class="calculated-date" readonly placeholder="Auto-calculated">
-        </div>
       </div>
     </div>
 
@@ -812,63 +815,13 @@
           <input type="number" id="hhBufferDays" min="0" value="0">
         </div>
       </div>
-
-      <div class="hh-dates-row" id="hhStartField">
-        <div class="field field-checkbox">
-          <label for="hhStartAuto">HH Start Mode</label>
-          <label class="checkbox-field">
-            <input type="checkbox" id="hhStartAuto" checked>
-            <span>Auto — start the day after tracking ends</span>
-          </label>
-        </div>
-        <div class="field">
-          <label>HH Phase Start Date</label>
-          <div id="hhStartManualWrap" class="hidden hh-start-input">
-            <div class="date-picker" id="hhStartDatePicker">
-              <div class="date-picker-input-wrap">
-                <input type="text" class="date-picker-display" readonly placeholder="Select HH start date">
-                <button type="button" class="date-picker-icon" aria-label="Open calendar">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                  </svg>
-                </button>
-                <input type="hidden" id="hhStartDate">
-              </div>
-              <div class="date-picker-popup hidden">
-                <div class="date-picker-header">
-                  <button type="button" class="date-picker-nav prev" aria-label="Previous month">‹</button>
-                  <span class="date-picker-month-year"></span>
-                  <button type="button" class="date-picker-nav next" aria-label="Next month">›</button>
-                </div>
-                <div class="date-picker-weekdays">
-                  <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                </div>
-                <div class="date-picker-days"></div>
-                <div class="date-picker-footer">
-                  <button type="button" class="date-picker-clear">Clear</button>
-                  <button type="button" class="date-picker-today">Today</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <input type="text" id="hhStartAutoDisplay" class="calculated-date hh-start-input" readonly placeholder="Calculated when plan is generated">
-        </div>
-        <div class="field">
-          <label>HH End Date</label>
-          <input type="text" id="hhEndDateDisplay" class="calculated-date hh-start-input" readonly placeholder="Auto-calculated">
-        </div>
-        <div class="field-hint hh-dates-hint" id="hhStartHint">HH begins the calendar day after tracking buffer ends (no gap).</div>
-      </div>
     </div>
 
     <h2 class="panel-title" style="margin-top: 1.25rem;">Start Date &amp; Weekly Offs</h2>
-    <div class="form-grid">
+    <div class="project-dates-row">
       <div class="field">
         <label>Project Start Date</label>
-        <div class="date-picker" id="startDatePicker">
+        <div class="date-picker project-date-input" id="startDatePicker">
           <div class="date-picker-input-wrap">
             <input type="text" class="date-picker-display" readonly placeholder="Select start date">
             <button type="button" class="date-picker-icon" aria-label="Open calendar">
@@ -900,10 +853,9 @@
       </div>
       <div class="field">
         <label>Overall End Date</label>
-        <input type="text" id="endDateDisplay" class="calculated-date" readonly placeholder="Auto-calculated from criteria">
-        <input type="hidden" id="endDate">
-        <div class="field-hint">Full plan end including buffer days, weekly offs &amp; public holidays.</div>
+        <input type="text" id="endDateDisplay" class="calculated-date project-date-input" readonly placeholder="Calculated when plan is generated">
       </div>
+      <div class="field-hint project-dates-hint" id="endDateHint">Full plan end including buffer days, weekly offs &amp; public holidays.</div>
     </div>
 
     <div class="field" style="margin-top: 1rem;">
@@ -1213,7 +1165,214 @@ const PhasePlanner = {
     return DateUtils.format(d);
   },
 
-  buildTracking(params, holidayMap) {
+  getEndConstrainedBounds(startStr, targetEndStr, refresherDays, bufferDays) {
+    const workStart = DateUtils.addDays(startStr, refresherDays);
+    let bufferStart = null;
+    let workEnd = targetEndStr;
+
+    if (bufferDays > 0) {
+      bufferStart = DateUtils.addDays(targetEndStr, -(bufferDays - 1));
+      workEnd = DateUtils.addDays(bufferStart, -1);
+    }
+
+    const earliestEnd = DateUtils.addDays(startStr, Math.max(0, refresherDays + bufferDays - 1));
+    if (targetEndStr < earliestEnd) {
+      throw new Error(
+        `End date (${DateUtils.formatDisplay(targetEndStr)}) is too early. Allow at least ${refresherDays} refresher and ${bufferDays} buffer day(s) from the start.`
+      );
+    }
+    if (workEnd < DateUtils.addDays(workStart, -1)) {
+      throw new Error(
+        `End date (${DateUtils.formatDisplay(targetEndStr)}) leaves no room for field work after refresher and buffer days.`
+      );
+    }
+
+    return {
+      workStart,
+      workEnd,
+      bufferStart,
+      gapEnd: bufferStart ? DateUtils.addDays(bufferStart, -1) : targetEndStr,
+    };
+  },
+
+  appendTrackingCalendarRow(rows, srRef, current, weekOffDays, holidayMap, handlers) {
+    const { status, holidayName } = PhasePlanner.getDayStatus(current, weekOffDays, holidayMap);
+    if (PhasePlanner.isNonWorking(status)) {
+      rows.push({
+        sr: PhasePlanner.formatSr(srRef.value++),
+        date: current,
+        dayName: DateUtils.dayName(current),
+        activity: status === "weekoff" ? "Weekly Off" : "Holiday",
+        staff: "-",
+        status: "off",
+        offType: status,
+        statusLabel: PhasePlanner.getTrackingStatusLabel("off", status),
+        plannedOutput: PhasePlanner.getTrackingOffOutput(status, holidayName),
+        girls: 0,
+        cumGirls: handlers.getCumGirls(),
+      });
+    } else {
+      handlers.onWorkingDay(rows, srRef, current);
+    }
+  },
+
+  buildTrackingConstrained(params, holidayMap, targetEndStr) {
+    const {
+      districtName,
+      startStr,
+      girlsTarget,
+      staff,
+      girlsPerStaff,
+      refresherDays,
+      bufferDays,
+      weekOffDays,
+    } = params;
+
+    const dailyCapacity = staff * girlsPerStaff;
+    const { workStart, workEnd, bufferStart, gapEnd } = PhasePlanner.getEndConstrainedBounds(
+      startStr,
+      targetEndStr,
+      refresherDays,
+      bufferDays
+    );
+
+    const rows = [];
+    let current = startStr;
+    const srRef = { value: 1 };
+    let remaining = girlsTarget;
+    let cumGirls = 0;
+    let lastCum = 0;
+    let workingDays = 0;
+
+    for (let i = 0; i < refresherDays; i++) {
+      rows.push({
+        sr: PhasePlanner.formatSr(srRef.value++),
+        date: current,
+        dayName: DateUtils.dayName(current),
+        activity: "Refresher Training",
+        staff,
+        status: "training",
+        statusLabel: "Training",
+        plannedOutput: "Refresher training of field staff",
+        girls: "-",
+        cumGirls: "-",
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    while (remaining > 0) {
+      if (current > workEnd) {
+        throw new Error(
+          `End date (${DateUtils.formatDisplay(targetEndStr)}) is too early to complete tracking of ${girlsTarget.toLocaleString()} girls at ${dailyCapacity} girls/day.`
+        );
+      }
+
+      PhasePlanner.appendTrackingCalendarRow(rows, srRef, current, weekOffDays, holidayMap, {
+        getCumGirls: () => lastCum,
+        onWorkingDay: () => {
+          const girls = Math.min(remaining, dailyCapacity);
+          remaining -= girls;
+          cumGirls += girls;
+          workingDays += 1;
+          lastCum = cumGirls;
+          rows.push({
+            sr: PhasePlanner.formatSr(srRef.value++),
+            date: current,
+            dayName: DateUtils.dayName(current),
+            activity: "Girls Tracking Exercise",
+            staff,
+            status: "working",
+            statusLabel: "Working Day",
+            plannedOutput: `Tracking & verification of approximately ${girls} girls`,
+            girls,
+            cumGirls,
+          });
+        },
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    while (current <= gapEnd) {
+      PhasePlanner.appendTrackingCalendarRow(rows, srRef, current, weekOffDays, holidayMap, {
+        getCumGirls: () => cumGirls,
+        onWorkingDay: () => {
+          rows.push({
+            sr: PhasePlanner.formatSr(srRef.value++),
+            date: current,
+            dayName: DateUtils.dayName(current),
+            activity: "Timeline Adjustment",
+            staff: "-",
+            status: "buffer",
+            statusLabel: "Adjusted",
+            plannedOutput: "Schedule adjusted to target end date",
+            girls: "-",
+            cumGirls,
+          });
+        },
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    for (let i = 0; i < bufferDays; i++) {
+      const remark = Config.BUFFER_REMARKS[i % Config.BUFFER_REMARKS.length];
+      rows.push({
+        sr: PhasePlanner.formatSr(srRef.value++),
+        date: current,
+        dayName: DateUtils.dayName(current),
+        activity: "Buffer & Data Validation",
+        staff: "-",
+        status: "buffer",
+        statusLabel: "Buffer",
+        plannedOutput: remark,
+        girls: "-",
+        cumGirls,
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    if (DateUtils.addDays(current, -1) !== targetEndStr) {
+      throw new Error("Internal scheduling error: plan did not end on the selected date.");
+    }
+
+    const offDays = rows.filter((r) => r.status === "off").length;
+    RowStyles.assignColors(rows);
+
+    const summary = {
+      phase: Config.PHASE_TRK,
+      phaseLabel: "Girls Tracking Exercise",
+      districtName,
+      startStr,
+      endStr: targetEndStr,
+      calendarDays: DateUtils.daysBetweenInclusive(startStr, targetEndStr),
+      workingDays,
+      offDays,
+      refresherDays,
+      bufferDays,
+      girlsTarget,
+      dailyCapacity,
+      staff,
+      avgDaily: workingDays ? Math.round(girlsTarget / workingDays) : 0,
+    };
+
+    return {
+      type: "tracking",
+      rows,
+      totals: { staff, girls: girlsTarget, cumGirls: girlsTarget },
+      summary,
+      milestones: [
+        { label: "Refresher Training", date: startStr, desc: `${refresherDays} refresher day(s) for field staff` },
+        { label: "Tracking Launch", date: rows.find((r) => r.status === "working")?.date, desc: "Start of girls tracking exercise" },
+        { label: "Tracking Completion", date: rows.filter((r) => r.status === "working").at(-1)?.date, desc: `All ${girlsTarget.toLocaleString()} girls tracked` },
+        { label: "Target End Date", date: targetEndStr, desc: "Custom overall end date applied to tracking phase" },
+      ],
+    };
+  },
+
+  buildTracking(params, holidayMap, targetEndStr = null) {
+    if (targetEndStr) {
+      return PhasePlanner.buildTrackingConstrained(params, holidayMap, targetEndStr);
+    }
+
     const {
       districtName,
       startStr,
@@ -1341,7 +1500,240 @@ const PhasePlanner = {
     };
   },
 
-  buildHH(params, holidayMap) {
+  appendHHCalendarRow(rows, srRef, current, districtName, weekOffDays, holidayMap, handlers) {
+    const { status, holidayName } = PhasePlanner.getDayStatus(current, weekOffDays, holidayMap);
+    if (PhasePlanner.isNonWorking(status)) {
+      rows.push({
+        sr: srRef.value++,
+        district: districtName,
+        phase: Config.PHASE_HH,
+        date: current,
+        dayName: DateUtils.dayName(current),
+        status: "off",
+        offType: status,
+        staff: "Off",
+        schoolGirls: 0,
+        mothers: 0,
+        fathers: 0,
+        dailyTotal: 0,
+        cumGirls: handlers.getCumGirls(),
+        cumTotal: handlers.getCumTotal(),
+        remarks: PhasePlanner.getOffRemark(status, holidayName),
+      });
+    } else {
+      handlers.onWorkingDay(rows, srRef, current);
+    }
+  },
+
+  buildHHConstrained(params, holidayMap, targetEndStr) {
+    const {
+      districtName,
+      startStr,
+      schoolGirlsTarget,
+      staff,
+      interviewsPerStaff,
+      refresherDays,
+      bufferDays,
+      weekOffDays,
+    } = params;
+
+    const dailyCapacity = staff * interviewsPerStaff;
+    const { workStart, workEnd, bufferStart, gapEnd } = PhasePlanner.getEndConstrainedBounds(
+      startStr,
+      targetEndStr,
+      refresherDays,
+      bufferDays
+    );
+
+    const rows = [];
+    let current = startStr;
+    const srRef = { value: 0 };
+    let remaining = schoolGirlsTarget;
+    let cumGirls = 0;
+    let cumTotal = 0;
+    let lastCumGirls = 0;
+    let lastCumTotal = 0;
+    let workingDays = 0;
+
+    for (let i = 0; i < refresherDays; i++) {
+      const srLabel = refresherDays === 1 && i === 0 ? "i" : PhasePlanner.formatSr(i + 1);
+      rows.push({
+        sr: srLabel,
+        district: districtName,
+        phase: Config.PHASE_HH,
+        date: current,
+        dayName: DateUtils.dayName(current),
+        status: "training",
+        staff: "-",
+        schoolGirls: "-",
+        mothers: "-",
+        fathers: "-",
+        dailyTotal: "-",
+        cumGirls: "-",
+        cumTotal: "-",
+        remarks: "Refresher training for field staff",
+      });
+      srRef.value = refresherDays === 1 ? 1 : refresherDays;
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    while (remaining > 0) {
+      if (current > workEnd) {
+        throw new Error(
+          `End date (${DateUtils.formatDisplay(targetEndStr)}) is too early to complete ${schoolGirlsTarget.toLocaleString()} school-girl interviews at ${dailyCapacity}/day.`
+        );
+      }
+
+      PhasePlanner.appendHHCalendarRow(rows, srRef, current, districtName, weekOffDays, holidayMap, {
+        getCumGirls: () => lastCumGirls,
+        getCumTotal: () => lastCumTotal,
+        onWorkingDay: () => {
+          const girls = Math.min(remaining, dailyCapacity);
+          remaining -= girls;
+          cumGirls += girls;
+          cumTotal += girls * 3;
+          workingDays += 1;
+          lastCumGirls = cumGirls;
+          lastCumTotal = cumTotal;
+          rows.push({
+            sr: srRef.value++,
+            district: districtName,
+            phase: Config.PHASE_HH,
+            date: current,
+            dayName: DateUtils.dayName(current),
+            status: "working",
+            staff,
+            schoolGirls: girls,
+            mothers: girls,
+            fathers: girls,
+            dailyTotal: girls * 3,
+            cumGirls,
+            cumTotal,
+            remarks: "",
+          });
+        },
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    while (current <= gapEnd) {
+      PhasePlanner.appendHHCalendarRow(rows, srRef, current, districtName, weekOffDays, holidayMap, {
+        getCumGirls: () => cumGirls,
+        getCumTotal: () => cumTotal,
+        onWorkingDay: () => {
+          rows.push({
+            sr: srRef.value++,
+            district: districtName,
+            phase: Config.PHASE_HH,
+            date: current,
+            dayName: DateUtils.dayName(current),
+            status: "buffer",
+            staff: "-",
+            schoolGirls: "-",
+            mothers: "-",
+            fathers: "-",
+            dailyTotal: "-",
+            cumGirls,
+            cumTotal,
+            remarks: "Schedule adjusted to target end date",
+          });
+        },
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    for (let i = 0; i < bufferDays; i++) {
+      const remark = Config.BUFFER_REMARKS[i % Config.BUFFER_REMARKS.length];
+      rows.push({
+        sr: srRef.value++,
+        district: districtName,
+        phase: Config.PHASE_HH,
+        date: current,
+        dayName: DateUtils.dayName(current),
+        status: "buffer",
+        staff: "-",
+        schoolGirls: "-",
+        mothers: "-",
+        fathers: "-",
+        dailyTotal: "-",
+        cumGirls,
+        cumTotal,
+        remarks: remark,
+      });
+      current = PhasePlanner.advanceDay(current);
+    }
+
+    if (DateUtils.addDays(current, -1) !== targetEndStr) {
+      throw new Error("Internal scheduling error: plan did not end on the selected date.");
+    }
+
+    const offDays = rows.filter((r) => r.status === "off").length;
+    const midTarget = Math.ceil(schoolGirlsTarget / 2);
+    let midDate = null;
+    let fieldLaunchDate = null;
+
+    for (const row of rows) {
+      if (row.status === "working" && !fieldLaunchDate) fieldLaunchDate = row.date;
+      if (row.status === "working" && row.cumGirls >= midTarget) {
+        midDate = row.date;
+        break;
+      }
+    }
+
+    for (const row of rows) {
+      if (row.status === "training") {
+        row.cumGirls = 0;
+        row.cumTotal = 0;
+      }
+    }
+
+    RowStyles.assignColors(rows);
+
+    const summary = {
+      phase: Config.PHASE_HH,
+      phaseLabel: "HH/GIRLS Interview Phase",
+      districtName,
+      startStr,
+      endStr: targetEndStr,
+      calendarDays: DateUtils.daysBetweenInclusive(startStr, targetEndStr),
+      workingDays,
+      offDays,
+      refresherDays,
+      bufferDays,
+      schoolGirlsTarget,
+      totalInterviews: schoolGirlsTarget * 3,
+      capacityPerCategory: dailyCapacity,
+      dailyInterviewsAvg: workingDays ? Math.round((schoolGirlsTarget * 3) / workingDays) : 0,
+      perCategoryAvg: workingDays ? Math.round(schoolGirlsTarget / workingDays) : 0,
+    };
+
+    return {
+      type: "hh",
+      rows,
+      totals: {
+        staff,
+        schoolGirls: schoolGirlsTarget,
+        mothers: schoolGirlsTarget,
+        fathers: schoolGirlsTarget,
+        dailyTotal: schoolGirlsTarget * 3,
+        cumGirls: schoolGirlsTarget,
+        cumTotal: schoolGirlsTarget * 3,
+      },
+      summary,
+      milestones: [
+        { label: "Field Launch", date: fieldLaunchDate || startStr, desc: `Start of HH/GIRLS data collection in ${districtName}` },
+        { label: "Mid-Point Review", date: midDate, desc: "Progress review — 50% of interviews expected complete" },
+        { label: "Final Field Day", date: rows.filter((r) => r.status === "working").at(-1)?.date, desc: "Last day of field data collection" },
+        { label: "Target End Date", date: targetEndStr, desc: "Custom overall end date applied to HH phase" },
+      ],
+    };
+  },
+
+  buildHH(params, holidayMap, targetEndStr = null) {
+    if (targetEndStr) {
+      return PhasePlanner.buildHHConstrained(params, holidayMap, targetEndStr);
+    }
+
     const {
       districtName,
       startStr,
@@ -1517,25 +1909,21 @@ const PhasePlanner = {
     };
   },
 
-  buildFullPlan(trackingParams, hhParams, holidayMap, hhStartOptions = {}) {
+  buildFullPlan(trackingParams, hhParams, holidayMap, options = {}) {
     const tracking = PhasePlanner.buildTracking(trackingParams, holidayMap);
-    const autoHhStart = PhasePlanner.advanceDay(tracking.summary.endStr);
-    const useAuto = hhStartOptions.auto !== false;
-    const hhStart = useAuto ? autoHhStart : (hhStartOptions.manualStart || autoHhStart);
+    const hhStart = PhasePlanner.advanceDay(tracking.summary.endStr);
 
-    if (!useAuto && hhStart < autoHhStart) {
+    if (options.targetEndStr && options.targetEndStr < hhStart) {
       throw new Error(
-        `HH start (${DateUtils.formatDisplay(hhStart)}) cannot be before the day after tracking ends (${DateUtils.formatDisplay(autoHhStart)}).`
+        `Overall end date (${DateUtils.formatDisplay(options.targetEndStr)}) cannot be before the HH phase start (${DateUtils.formatDisplay(hhStart)}).`
       );
     }
 
-    const hh = PhasePlanner.buildHH({ ...hhParams, startStr: hhStart }, holidayMap);
+    const hh = PhasePlanner.buildHH({ ...hhParams, startStr: hhStart }, holidayMap, options.targetEndStr || null);
     hh.milestones.unshift({
       label: "HH Phase Start",
       date: hhStart,
-      desc: useAuto
-        ? `Auto — starts day after tracking ends (${DateUtils.formatDisplay(tracking.summary.endStr)} → ${DateUtils.formatDisplay(hhStart)})`
-        : "Custom HH start date",
+      desc: `Auto — starts day after tracking ends (${DateUtils.formatDisplay(tracking.summary.endStr)} → ${DateUtils.formatDisplay(hhStart)})`,
     });
 
     return {
@@ -1543,7 +1931,7 @@ const PhasePlanner = {
       districtName: trackingParams.districtName,
       startStr: trackingParams.startStr,
       endStr: hh.summary.endStr,
-      autoHhStart,
+      autoHhStart: hhStart,
       hhStartUsed: hhStart,
       tracking,
       hh,
@@ -2105,12 +2493,10 @@ const App = {
 
     document.getElementById("planMode").value = "full";
     CustomSelect.setValue("planMode", "full");
-    DatePicker.init("startDatePicker", Districts.dik.tracking.start, () => App.clearEndDates());
-    DatePicker.init("hhStartDatePicker", "", () => App.clearEndDates());
+    DatePicker.init("startDatePicker", Districts.dik.tracking.start, () => App.clearCalculatedEndDisplays());
     App.setWeekOffs(Districts.dik.weekOffs);
     App.applyDistrictPreset();
     App.updatePhaseVisibility();
-    App.updateHhStartUi();
     App.clearEndDates();
 
     document.getElementById("districtSelect").addEventListener("change", () => {
@@ -2123,19 +2509,15 @@ const App = {
       App.applyStartDateForMode();
       App.clearEndDates();
     });
-    document.getElementById("hhStartAuto").addEventListener("change", () => {
-      App.updateHhStartUi();
-      App.clearEndDates();
-    });
     document.getElementById("generateBtn").addEventListener("click", () => App.generate());
 
     const watchIds = [
       "trkGirlsTarget", "trkStaff", "trkGirlsPerStaff", "trkRefresherDays", "trkBufferDays",
       "hhSchoolGirls", "hhStaff", "hhInterviewsPerStaff", "hhRefresherDays", "hhBufferDays",
     ];
-    watchIds.forEach((id) => document.getElementById(id).addEventListener("change", () => App.clearEndDates()));
+    watchIds.forEach((id) => document.getElementById(id).addEventListener("change", () => App.clearCalculatedEndDisplays()));
     document.querySelectorAll("#weekdayCheckboxes input").forEach((el) => {
-      el.addEventListener("change", () => App.clearEndDates());
+      el.addEventListener("change", () => App.clearCalculatedEndDisplays());
     });
 
     document.getElementById("searchInput").addEventListener("input", () => App.applyFilters());
@@ -2149,23 +2531,6 @@ const App = {
     const mode = document.getElementById("planMode").value;
     document.getElementById("trackingConfig").classList.toggle("hidden", mode === "hh");
     document.getElementById("hhConfig").classList.toggle("hidden", mode === "tracking");
-    document.getElementById("hhStartField").classList.toggle("hidden", mode !== "full");
-    App.updateHhStartUi();
-  },
-
-  updateHhStartUi() {
-    const mode = document.getElementById("planMode").value;
-    const auto = document.getElementById("hhStartAuto").checked;
-    const isFull = mode === "full";
-    const manualWrap = document.getElementById("hhStartManualWrap");
-    const autoDisplay = document.getElementById("hhStartAutoDisplay");
-
-    manualWrap.classList.toggle("hidden", !isFull || auto);
-    autoDisplay.classList.toggle("hidden", !isFull || !auto);
-
-    document.getElementById("hhStartHint").textContent = auto
-      ? "HH begins the calendar day after tracking buffer ends (no gap)."
-      : "Pick a custom HH start date (must be on or after the day after tracking ends).";
   },
 
   setWeekOffs(days) {
@@ -2208,34 +2573,20 @@ const App = {
     DatePicker.setDate("startDatePicker", start);
   },
 
+  clearCalculatedEndDisplays() {
+    const el = document.getElementById("endDateDisplay");
+    if (!el) return;
+    el.value = "";
+    el.placeholder = "Calculated when plan is generated";
+  },
+
   clearEndDates() {
-    ["endDate", "endDateDisplay", "trkEndDateDisplay", "hhEndDateDisplay"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (el.tagName === "INPUT") {
-        el.value = "";
-        if (id.includes("Display")) el.placeholder = "Auto-calculated";
-      }
-    });
+    App.clearCalculatedEndDisplays();
   },
 
   setEndDates(plan) {
     const range = ExportService.getPlanRange(plan);
-    document.getElementById("endDate").value = range.endStr;
     document.getElementById("endDateDisplay").value = DateUtils.formatDisplay(range.endStr);
-    if (plan.tracking) {
-      document.getElementById("trkEndDateDisplay").value = DateUtils.formatDisplay(plan.tracking.summary.endStr);
-    }
-    if (plan.hh) {
-      document.getElementById("hhEndDateDisplay").value = DateUtils.formatDisplay(plan.hh.summary.endStr);
-    }
-    if (plan.mode === "full") {
-      const autoDisplay = document.getElementById("hhStartAutoDisplay");
-      autoDisplay.value = DateUtils.formatDisplay(plan.autoHhStart);
-      if (!document.getElementById("hhStartAuto").checked) {
-        DatePicker.setDate("hhStartDatePicker", plan.hhStartUsed);
-      }
-    }
   },
 
   getDistrictName() {
@@ -2276,8 +2627,6 @@ const App = {
       startStr,
       tracking,
       hh,
-      hhStartAuto: document.getElementById("hhStartAuto").checked,
-      hhStartManual: document.getElementById("hhStartDate").value,
     };
   },
 
@@ -2313,10 +2662,6 @@ const App = {
         alert("HH refresher and buffer days cannot be negative.");
         return false;
       }
-    }
-    if (input.mode === "full" && !input.hhStartAuto && !input.hhStartManual) {
-      alert("Please select a custom HH start date, or enable Auto start.");
-      return false;
     }
     return true;
   },
@@ -2367,10 +2712,7 @@ const App = {
 
       let plan;
       if (input.mode === "full") {
-        plan = PhasePlanner.buildFullPlan(input.tracking, input.hh, holidayMap, {
-          auto: input.hhStartAuto,
-          manualStart: input.hhStartManual,
-        });
+        plan = PhasePlanner.buildFullPlan(input.tracking, input.hh, holidayMap);
       } else if (input.mode === "tracking") {
         const tracking = PhasePlanner.buildTracking(input.tracking, holidayMap);
         plan = { mode: "tracking", districtName: input.tracking.districtName, startStr: tracking.summary.startStr, endStr: tracking.summary.endStr, tracking };
